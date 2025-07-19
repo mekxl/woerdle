@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Penius<title>
+  <title>Penius</title>
   <link rel="stylesheet" href="style.css" />
   <script defer src="palavras.js"></script>
   <script defer src="script.js"></script>
@@ -113,20 +113,12 @@
         alert("Você já usou todas as 3 dicas desta rodada!");
         return;
       }
-      // Exemplo de dica: revelar uma letra certa na posição
       let letraCerta = palavraSecreta[dicasUsadas];
       alert(`Dica ${dicasUsadas + 1}: A letra ${letraCerta.toUpperCase()} está na posição ${dicasUsadas + 1}`);
       dicasUsadas++;
     }
 
     criarGrade();
-
-    // Exemplo de uso (simula digitação do jogador)
-    const exemploTentativa = "pleno";
-    for (let i = 0; i < exemploTentativa.length; i++) {
-      const letra = exemploTentativa[i];
-      atualizarLetrasUsadas(letra, palavraSecreta.includes(letra));
-    }
   </script>
 </body>
 
