@@ -1,125 +1,18 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Penius</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="palavras.js"></script>
-  <script defer src="script.js"></script>
-  <style>
-    body {
-      background-color: #121212;
-      color: #f1f1f1;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-    }
-
-    #container {
-      display: flex;
-      gap: 40px;
-    }
-
-    #game {
-      display: grid;
-      grid-template-columns: repeat(5, 60px);
-      grid-gap: 10px;
-    }
-
-    .tile {
-      width: 60px;
-      height: 60px;
-      border: 2px solid #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      background-color: #1e1e1e;
-      color: #fff;
-    }
-
-    #used-letters-container {
-      min-width: 150px;
-      background-color: #1e1e1e;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-    }
-
-    #used-letters-container h2 {
-      margin-top: 0;
-      font-size: 18px;
-    }
-
-    #used-letters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 10px;
-    }
-
-    .used-letter {
-      background-color: #444;
-      color: #aaa;
-      border-radius: 4px;
-      padding: 5px 8px;
-      font-size: 16px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Adivinhação</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <div id="container">
-    <div id="game"></div>
-    <div id="used-letters-container">
-      <h2>Letras Usadas</h2>
-      <div id="used-letters"></div>
-    </div>
-  </div>
-  <script>
-    const gameElement = document.getElementById('game');
-    const usedLettersContainer = document.getElementById('used-letters');
-    const palavraSecreta = listaPalavras[Math.floor(Math.random() * listaPalavras.length)];
-    let letrasUsadas = new Set();
-    let dicasUsadas = 0;
-    const limiteDicas = 3;
+    <h1>Letra Usadas</h1>
+    <div id="letras-usadas"></div>
+    <div id="palavra-exibida"></div>
+    <button id="btn-entrar">ENTER</button>
 
-    function criarGrade() {
-      for (let i = 0; i < 30; i++) {
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        gameElement.appendChild(tile);
-      }
-    }
-
-    function atualizarLetrasUsadas(letra, contemNaPalavra) {
-      if (!contemNaPalavra && !letrasUsadas.has(letra)) {
-        letrasUsadas.add(letra);
-        const span = document.createElement('span');
-        span.className = 'used-letter';
-        span.textContent = letra;
-        usedLettersContainer.appendChild(span);
-      }
-    }
-
-    function mostrarDica() {
-      if (dicasUsadas >= limiteDicas) {
-        alert("Você já usou todas as 3 dicas desta rodada!");
-        return;
-      }
-      let letraCerta = palavraSecreta[dicasUsadas];
-      alert(`Dica ${dicasUsadas + 1}: A letra ${letraCerta.toUpperCase()} está na posição ${dicasUsadas + 1}`);
-      dicasUsadas++;
-    }
-
-    criarGrade();
-  </script>
+    <script src="palavras.js"></script>
+    <script src="script.js"></script>
 </body>
-
 </html>
