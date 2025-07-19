@@ -1,109 +1,105 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Penius</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      background-color: #f4f4f4;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Penius</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
 
-    #container {
-      display: flex;
-      gap: 40px;
-    }
+        #container {
+            display: flex;
+            gap: 40px;
+        }
 
-    #game {
-      display: grid;
-      grid-template-columns: repeat(5, 60px);
-      grid-gap: 10px;
-      margin-top: 20px;
-    }
+        #game {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
 
-    .cell {
-      width: 60px;
-      height: 60px;
-      border: 2px solid #ccc;
-      text-align: center;
-      line-height: 60px;
-      font-size: 24px;
-      text-transform: uppercase;
-    }
+        .cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #ccc;
+            text-align: center;
+            line-height: 60px;
+            font-size: 24px;
+            text-transform: uppercase;
+        }
 
-    .correct {
-      background-color: green;
-      color: white;
-    }
+        .correct {
+            background-color: green;
+            color: white;
+        }
 
-    .present {
-      background-color: goldenrod;
-      color: white;
-    }
+        .present {
+            background-color: goldenrod;
+            color: white;
+        }
 
-    .absent {
-      background-color: #ccc;
-      color: white;
-    }
+        .absent {
+            background-color: #ccc;
+            color: white;
+        }
 
-    #used-letters-container {
-      margin-top: 20px;
-    }
+        #used-letters-container {
+            margin-top: 20px;
+        }
 
-    #used-letters {
-      display: flex;
-      flex-wrap: wrap;
-      max-width: 120px;
-      gap: 5px;
-      font-weight: bold;
-    }
+        #used-letters {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 120px;
+            gap: 5px;
+            font-weight: bold;
+        }
 
-    .used-letter {
-      padding: 5px;
-      background-color: #ccc;
-      border-radius: 4px;
-    }
+        .used-letter {
+            padding: 5px;
+            background-color: #ccc;
+            border-radius: 4px;
+        }
 
-    input[type="text"] {
-      margin-top: 20px;
-      padding: 10px;
-      font-size: 18px;
-      width: 320px;
-      text-align: center;
-      text-transform: uppercase;
-    }
+        input[type="text"] {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 18px;
+            width: 320px;
+            text-align: center;
+            text-transform: uppercase;
+        }
 
-    #message {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
+        #message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
-
 <body>
-  <h1>Penius</h1>
-  <div id="container">
-    <div>
-      <div id="game"></div>
-      <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Digite sua palavra">
-      <div id="message"></div>
+    <h1>Penius</h1>
+    <div id="container">
+        <div>
+            <div id="game"></div>
+            <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Digite sua palavra">
+            <button id="hintButton">Dica</button>
+            <div id="message"></div>
+        </div>
+        <div id="used-letters-container">
+            <h2>Letras Usadas</h2>
+            <div id="used-letters"></div>
+        </div>
     </div>
-    <div id="used-letters-container">
-      <h2>Letras Usadas</h2>
-      <div id="used-letters"></div>
-    </div>
-  </div>
-
-  <script>
-    const palavras = [
-      
-      "cuzao", "penis", "bolas", "vadio", "pinto", "gosto", "surra", "tanga", "cuspe", "dildo", "porno", "malha", 
+    <script>
+        const palavras = [ "cuzao", "penis", "bolas", "vadio", "pinto", "gosto", "surra", "tanga", "cuspe", "dildo", "porno", "malha", 
   "nudes", "bosta", "merda", "chupe", "samba", "roubo", "vulva", "gozar", "guria", "corno", "treta", "doido", 
   "viado", "putas", "babao", "bunda", "leite", "mamas", "perna", "tetas", "putao", "papos", "mansa", "dedao", 
   "rosca", "mamou", "mamam", "leito", "orgia", "rolao", "socar", "lambe", "tesao", "molha", "cevas", "chuca", 
@@ -142,90 +138,102 @@
   "linha", "minha", "tinha",  "senha", "lenha", "venha", "tenha", "ninho",   "ombro", "braço", "pulso", "peito",  "bunda", "nariz",  "barba", "feliz",  "bravo", "calmo",  "livre", "preso"
 
 
+];
+        const gameDiv = document.getElementById("game");
+        const input = document.getElementById("guessInput");
+        const messageDiv = document.getElementById("message");
+        const usedLettersDiv = document.getElementById("used-letters");
+        const hintButton = document.getElementById("hintButton");
+        
+        let currentRow = 0;
+        let letrasUsadas = new Set();
+        let palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
 
-    ];
-
-    const gameDiv = document.getElementById("game");
-    const input = document.getElementById("guessInput");
-    const messageDiv = document.getElementById("message");
-    const usedLettersDiv = document.getElementById("used-letters");
-    let currentRow = 0;
-    let letrasUsadas = new Set();
-
-    let palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
-
-    function createRow(rowIndex) {
-      for (let i = 0; i < 5; i++) {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        cell.id = `cell-${rowIndex}-${i}`;
-        gameDiv.appendChild(cell);
-      }
-    }
-
-    function atualizarLetrasUsadas() {
-      usedLettersDiv.innerHTML = "";
-      Array.from(letrasUsadas).sort().forEach(letra => {
-        const span = document.createElement("span");
-        span.textContent = letra.toUpperCase();
-        span.className = "used-letter";
-        usedLettersDiv.appendChild(span);
-      });
-    }
-
-    for (let i = 0; i < 6; i++) {
-      createRow(i);
-    }
-
-    input.addEventListener("keyup", function (event) {
-      if (event.key === "Enter") {
-        const guess = input.value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-        input.value = "";
-        if (guess.length !== 5 || !palavras.includes(guess)) {
-          messageDiv.textContent = "Ou eu esqueci essa palavra ou você escreveu errado.";
-          return;
-        }
-        messageDiv.textContent = "";
-
-        for (let i = 0; i < 5; i++) {
-          const cell = document.getElementById(`cell-${currentRow}-${i}`);
-          cell.textContent = guess[i];
-          if (guess[i] === palavraDoDia[i]) {
-            cell.classList.add("correct");
-          } else if (palavraDoDia.includes(guess[i])) {
-            cell.classList.add("present");
-          } else {
-            cell.classList.add("absent");
-            letrasUsadas.add(guess[i]);
-          }
+        function createRow(rowIndex) {
+            for (let i = 0; i < 5; i++) {
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                cell.id = `cell-${rowIndex}-${i}`;
+                gameDiv.appendChild(cell);
+            }
         }
 
-        atualizarLetrasUsadas();
-
-        if (guess === palavraDoDia) {
-          messageDiv.textContent = "Você acertou! Nova palavra sorteada!";
-          palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
-          gameDiv.innerHTML = "";
-          letrasUsadas.clear();
-          atualizarLetrasUsadas();
-          currentRow = 0;
-          for (let i = 0; i < 6; i++) createRow(i);
-          return;
+        function atualizarLetrasUsadas() {
+            usedLettersDiv.innerHTML = "";
+            Array.from(letrasUsadas).sort().forEach(letra => {
+                const span = document.createElement("span");
+                span.textContent = letra.toUpperCase();
+                span.className = "used-letter";
+                usedLettersDiv.appendChild(span);
+            });
         }
 
-        currentRow++;
-        if (currentRow >= 6) {
-          messageDiv.textContent = `Errou tudo! A palavra era "${palavraDoDia.toUpperCase()}". Nova palavra sorteada!`;
-          palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
-          gameDiv.innerHTML = "";
-          letrasUsadas.clear();
-          atualizarLetrasUsadas();
-          currentRow = 0;
-          for (let i = 0; i < 6; i++) createRow(i);
+        function revealHint() {
+            const letrasUsadasArray = Array.from(letrasUsadas);
+            let letraParaRevelar;
+            for (let i = 0; i < 5; i++) {
+                if (!letrasUsadasArray.includes(palavraDoDia[i])) {
+                    letraParaRevelar = palavraDoDia[i];
+                    break;
+                }
+            }
+            if (letraParaRevelar) {
+                const cell = Array.from(document.querySelectorAll('.cell')).find(cell => cell.textContent === '');
+                if (cell) {
+                    cell.textContent = letraParaRevelar;
+                    cell.classList.add("correct");
+                }
+            }
         }
-      }
-    });
-  </script>
+
+        hintButton.addEventListener("click", revealHint);
+
+        for (let i = 0; i < 6; i++) { createRow(i); }
+
+        input.addEventListener("keyup", function (event) {
+            if (event.key === "Enter") {
+                const guess = input.value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+                input.value = "";
+                if (guess.length !== 5 || !palavras.includes(guess)) {
+                    messageDiv.textContent = "Ou eu esqueci essa palavra ou você escreveu errado.";
+                    return;
+                }
+                messageDiv.textContent = "";
+                for (let i = 0; i < 5; i++) {
+                    const cell = document.getElementById(`cell-${currentRow}-${i}`);
+                    cell.textContent = guess[i];
+                    if (guess[i] === palavraDoDia[i]) {
+                        cell.classList.add("correct");
+                    } else if (palavraDoDia.includes(guess[i])) {
+                        cell.classList.add("present");
+                    } else {
+                        cell.classList.add("absent");
+                        letrasUsadas.add(guess[i]);
+                    }
+                }
+                atualizarLetrasUsadas();
+                if (guess === palavraDoDia) {
+                    messageDiv.textContent = "Você acertou! Nova palavra sorteada!";
+                    palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
+                    gameDiv.innerHTML = "";
+                    letrasUsadas.clear();
+                    atualizarLetrasUsadas();
+                    currentRow = 0;
+                    for (let i = 0; i < 6; i++) createRow(i);
+                    return;
+                }
+                currentRow++;
+                if (currentRow >= 6) {
+                    messageDiv.textContent = `Errou tudo! A palavra era "${palavraDoDia.toUpperCase()}". Nova palavra sorteada!`;
+                    palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
+                    gameDiv.innerHTML = "";
+                    letrasUsadas.clear();
+                    atualizarLetrasUsadas();
+                    currentRow = 0;
+                    for (let i = 0; i < 6; i++) createRow(i);
+                }
+            }
+        });
+    </script>
 </body>
-
 </html>
