@@ -1,18 +1,227 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Adivinhação</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <h1>Letra Usadas</h1>
-    <div id="letras-usadas"></div>
-    <div id="palavra-exibida"></div>
-    <button id="btn-entrar">ENTER</button>
+<html lang="pt-br">
 
-    <script src="palavras.js"></script>
-    <script src="script.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Penius</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #container {
+      display: flex;
+      gap: 40px;
+    }
+
+    #game {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      grid-gap: 10px;
+      margin-top: 20px;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #ccc;
+      text-align: center;
+      line-height: 60px;
+      font-size: 24px;
+      text-transform: uppercase;
+    }
+
+    .correct {
+      background-color: green;
+      color: white;
+    }
+
+    .present {
+      background-color: goldenrod;
+      color: white;
+    }
+
+    .absent {
+      background-color: #ccc;
+      color: white;
+    }
+
+    #used-letters-container {
+      margin-top: 20px;
+    }
+
+    #used-letters {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 120px;
+      gap: 5px;
+      font-weight: bold;
+    }
+
+    .used-letter {
+      padding: 5px;
+      background-color: #ccc;
+      border-radius: 4px;
+    }
+
+    input[type="text"] {
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 18px;
+      width: 320px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Penius</h1>
+  <div id="container">
+    <div>
+      <div id="game"></div>
+      <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Digite sua palavra">
+      <div id="message"></div>
+    </div>
+    <div id="used-letters-container">
+      <h2>Letras Usadas</h2>
+      <div id="used-letters"></div>
+    </div>
+  </div>
+
+  <script>
+    const palavras = [  "cuzao", "penis", "bolas", "vadio", "pinto", "gosto", "surra", "tanga", "cuspe", "dildo", "porno", "malha", 
+  "nudes", "bosta", "merda", "chupe", "samba", "roubo", "vulva", "gozar", "guria", "corno", "treta", "doido", 
+  "viado", "putas", "babao", "bunda", "leite", "mamas", "perna", "tetas", "putao", "papos", "mansa", "dedao", 
+  "rosca", "mamou", "mamam", "leito", "orgia", "rolao", "socar", "lambe", "tesao", "molha", "cevas", "chuca", 
+  "pariu", "comer", "comia", "cuzin", "beijo", "pauza", "melao", "cagar", "gorda", "farto", "gemer", "coito", 
+  "risos", "macho", "tonta", "bocas", "preto", "louro", "louco", "matar", "morre", "ferir", "braba", "burra", 
+  "putin", "comem", "feios", "puxao", "puxam", "porra", "carai", "foder", "fudeu", "meter", "furar",
+
+  "arroz", "carro", "pedra", "luzia", "lapis", "cobra", "zebra", "bicho", "livro", "nuvem", "chuva", "parda", 
+  "ruiva", "amora", "selva", "turbo", "cacto", "lindo", "burro", "massa", "tocha", "vinil", "meias", "sushi", "trote", "cofre", "vinho", "pirar", "manja", "vazar", "ranho", "larva", "sagaz", "duros", "densa", 
+  "mofar", "troco", "velha", "berro", "urubu", "muros", "vetor", "moeda", "raiva", "zumbi", "xingo", "nobre", 
+  "rolou", "sadia", "nossa", "lenta", "noite", "vazio", "dores", "cinto", "manco", "velho", "sogra", 
+  "noiva", "hiena", "carne", "muito", "verbo", "nariz", "morro", "pavio", "rouba", "penso", "dessa", 
+  "banho", "feira", "salve", "forno", "festa", "notar", "quero", "prato", "roupa", "grade", 
+  "canal", "troca", "ganha", "canto", "corte", "dente", "gente", "jovem", "mundo", "piano", "sabor", "tarde", 
+  "viver", "fugir", "fazer", "pagar", "saber", "dolar", "ficha", "gordo", "hobby", "jogar", "lacre", 
+  "ninja", "pasta", "quase", "sorte", "tinta", "vapor", "banda", "carta",
+
+  "abalo", "abate", "abduz", "abril", "abrir", "abriu","abuso", "acaba", "acabe", "acabo", 
+ "achei", "acida", "acido", "acima", "acnes","acres","acude",
+
+  "tigre", "ursos", "gatos", "porco", "cabra", "patos", "ganso", "cisne", "aguia", "corvo", 
+  "pomba", "sabia", "arara", "beija", "cobra", "polvo", "lulas",
+
+  "azuis", "verde", "preto", "roxos", "cinza", "bronze", "branco",
+
+  "pizza", "massa", "peixe", "porco", "leite", "bolos", "torta", "doces", "manga", 
+  "melao", "limao", "figos", "milho", "aveia", "trigo",
+
+ "copos", "facas", "forno", "ferro", "pente", "sabao", "creme", "mouse", "radio", 
+  "pilha", "placa", "fonte",
+
+  "andar", "pular", "nadar", "subir", "abrir", "ligar", "falar", "olhar", "sentir", "tocar", "pensar", 
+  "viver", "morrer", "nascer",
+     "raiva", "morte", "tempo", "forca", "poder", "calma", "chave", "chuva", "chama", "chega", "cheia",  "china", "choca", "chora", 
+  "malha", "velha", "folha", "molha", "bolha",  "falha",  "calha", 
+  "linha", "minha", "tinha",  "senha", "lenha", "venha", "tenha", "ninho",   "ombro", "braço", "pulso", "peito",  "bunda", "nariz",  "barba", "feliz",  "bravo", "calmo",  "livre", "preso"
+
+
+];
+
+    const gameDiv = document.getElementById("game");
+    const input = document.getElementById("guessInput");
+    const messageDiv = document.getElementById("message");
+    const usedLettersDiv = document.getElementById("used-letters");
+    let currentRow = 0;
+    let letrasUsadas = new Set();
+
+    let palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
+
+    function createRow(rowIndex) {
+      for (let i = 0; i < 5; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.id = cell-${rowIndex}-${i};
+        gameDiv.appendChild(cell);
+      }
+    }
+
+    function atualizarLetrasUsadas() {
+      usedLettersDiv.innerHTML = "";
+      Array.from(letrasUsadas).sort().forEach(letra => {
+        const span = document.createElement("span");
+        span.textContent = letra.toUpperCase();
+        span.className = "used-letter";
+        usedLettersDiv.appendChild(span);
+      });
+    }
+
+    for (let i = 0; i < 6; i++) {
+      createRow(i);
+    }
+
+    input.addEventListener("keyup", function (event) {
+      if (event.key === "Enter") {
+        const guess = input.value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+        input.value = "";
+        if (guess.length !== 5 || !palavras.includes(guess)) {
+          messageDiv.textContent = "Ou eu esqueci essa palavra ou você escreveu errado.";
+          return;
+        }
+        messageDiv.textContent = "";
+
+        for (let i = 0; i < 5; i++) {
+          const cell = document.getElementById(cell-${currentRow}-${i});
+          cell.textContent = guess[i];
+          if (guess[i] === palavraDoDia[i]) {
+            cell.classList.add("correct");
+          } else if (palavraDoDia.includes(guess[i])) {
+            cell.classList.add("present");
+          } else {
+            cell.classList.add("absent");
+            letrasUsadas.add(guess[i]);
+          }
+        }
+
+        atualizarLetrasUsadas();
+
+        if (guess === palavraDoDia) {
+          messageDiv.textContent = "Você acertou! Nova palavra sorteada!";
+          palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
+          gameDiv.innerHTML = "";
+          letrasUsadas.clear();
+          atualizarLetrasUsadas();
+          currentRow = 0;
+          for (let i = 0; i < 6; i++) createRow(i);
+          return;
+        }
+
+        currentRow++;
+        if (currentRow >= 6) {
+          messageDiv.textContent = Errou tudo! A palavra era "${palavraDoDia.toUpperCase()}". Nova palavra sorteada!;
+          palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
+          gameDiv.innerHTML = "";
+          letrasUsadas.clear();
+          atualizarLetrasUsadas();
+          currentRow = 0;
+          for (let i = 0; i < 6; i++) createRow(i);
+        }
+      }
+    });
+  </script>
 </body>
+
 </html>
