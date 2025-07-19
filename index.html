@@ -1,227 +1,237 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Penius</title>
   <style>
     body {
       font-family: sans-serif;
       display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      margin-top: 50px;
+    }
+
+    .game-container {
+      display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
     }
 
-    #container {
-      display: flex;
-      gap: 40px;
-    }
-
-    #game {
+    .grid {
       display: grid;
-      grid-template-columns: repeat(5, 60px);
-      grid-gap: 10px;
-      margin-top: 20px;
+      grid-template-columns: repeat(5, 50px);
+      grid-gap: 5px;
+      margin-bottom: 20px;
     }
 
     .cell {
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       border: 2px solid #ccc;
-      text-align: center;
-      line-height: 60px;
       font-size: 24px;
+      font-weight: bold;
       text-transform: uppercase;
+      text-align: center;
+      line-height: 50px;
+      background-color: #fff;
     }
 
     .correct {
-      background-color: green;
+      background-color: #6aaa64;
       color: white;
     }
 
     .present {
-      background-color: goldenrod;
+      background-color: #c9b458;
       color: white;
     }
 
     .absent {
-      background-color: #ccc;
+      background-color: #787c7e;
       color: white;
     }
 
-    #used-letters-container {
-      margin-top: 20px;
-    }
-
-    #used-letters {
-      display: flex;
-      flex-wrap: wrap;
-      max-width: 120px;
-      gap: 5px;
-      font-weight: bold;
-    }
-
-    .used-letter {
-      padding: 5px;
-      background-color: #ccc;
-      border-radius: 4px;
-    }
-
     input[type="text"] {
-      margin-top: 20px;
-      padding: 10px;
-      font-size: 18px;
-      width: 320px;
-      text-align: center;
+      font-size: 20px;
       text-transform: uppercase;
+      padding: 5px;
+      width: 150px;
+      text-align: center;
     }
 
-    #message {
-      margin-top: 20px;
-      font-weight: bold;
+    button {
+      margin-top: 10px;
+      padding: 6px 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .used-letters {
+      border: 1px solid #ccc;
+      padding: 10px;
+      width: 150px;
+      min-height: 100px;
+      background-color: #f7f7f7;
+    }
+
+    .used-letters h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+    }
+
+    .message {
+      margin-top: 10px;
+      height: 20px;
+      color: #333;
     }
   </style>
 </head>
-
 <body>
-  <h1>Penius</h1>
-  <div id="container">
-    <div>
-      <div id="game"></div>
-      <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Digite sua palavra">
-      <div id="message"></div>
-    </div>
-    <div id="used-letters-container">
-      <h2>Letras Usadas</h2>
-      <div id="used-letters"></div>
-    </div>
-  </div>
 
-  <script>
-    const palavras = [  "cuzao", "penis", "bolas", "vadio", "pinto", "gosto", "surra", "tanga", "cuspe", "dildo", "porno", "malha", 
-  "nudes", "bosta", "merda", "chupe", "samba", "roubo", "vulva", "gozar", "guria", "corno", "treta", "doido", 
-  "viado", "putas", "babao", "bunda", "leite", "mamas", "perna", "tetas", "putao", "papos", "mansa", "dedao", 
-  "rosca", "mamou", "mamam", "leito", "orgia", "rolao", "socar", "lambe", "tesao", "molha", "cevas", "chuca", 
-  "pariu", "comer", "comia", "cuzin", "beijo", "pauza", "melao", "cagar", "gorda", "farto", "gemer", "coito", 
-  "risos", "macho", "tonta", "bocas", "preto", "louro", "louco", "matar", "morre", "ferir", "braba", "burra", 
-  "putin", "comem", "feios", "puxao", "puxam", "porra", "carai", "foder", "fudeu", "meter", "furar",
+<div class="game-container">
+  <div class="grid" id="grid"></div>
+  <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Digite uma palavra">
+  <button id="submitGuess">Enviar</button>
+  <button id="hintButton">🔍 Dica (3 restantes)</button>
+  <div class="message" id="message"></div>
+</div>
 
-  "arroz", "carro", "pedra", "luzia", "lapis", "cobra", "zebra", "bicho", "livro", "nuvem", "chuva", "parda", 
-  "ruiva", "amora", "selva", "turbo", "cacto", "lindo", "burro", "massa", "tocha", "vinil", "meias", "sushi", "trote", "cofre", "vinho", "pirar", "manja", "vazar", "ranho", "larva", "sagaz", "duros", "densa", 
-  "mofar", "troco", "velha", "berro", "urubu", "muros", "vetor", "moeda", "raiva", "zumbi", "xingo", "nobre", 
-  "rolou", "sadia", "nossa", "lenta", "noite", "vazio", "dores", "cinto", "manco", "velho", "sogra", 
-  "noiva", "hiena", "carne", "muito", "verbo", "nariz", "morro", "pavio", "rouba", "penso", "dessa", 
-  "banho", "feira", "salve", "forno", "festa", "notar", "quero", "prato", "roupa", "grade", 
-  "canal", "troca", "ganha", "canto", "corte", "dente", "gente", "jovem", "mundo", "piano", "sabor", "tarde", 
-  "viver", "fugir", "fazer", "pagar", "saber", "dolar", "ficha", "gordo", "hobby", "jogar", "lacre", 
-  "ninja", "pasta", "quase", "sorte", "tinta", "vapor", "banda", "carta",
+<div class="used-letters">
+  <h3>Letras Usadas</h3>
+  <div id="letrasUsadas"></div>
+</div>
 
-  "abalo", "abate", "abduz", "abril", "abrir", "abriu","abuso", "acaba", "acabe", "acabo", 
- "achei", "acida", "acido", "acima", "acnes","acres","acude",
+<script>
+  const palavras = ["manga", "pedra", "livro", "canto", "dente", "festa", "cabra", "pular", "grito", "velho"];
+  const palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)];
+  let currentRow = 0;
+  const maxDicas = 3;
+  let dicasUsadas = 0;
+  const letrasUsadas = new Set();
 
-  "tigre", "ursos", "gatos", "porco", "cabra", "patos", "ganso", "cisne", "aguia", "corvo", 
-  "pomba", "sabia", "arara", "beija", "cobra", "polvo", "lulas",
+  const grid = document.getElementById("grid");
+  const input = document.getElementById("guessInput");
+  const submitBtn = document.getElementById("submitGuess");
+  const hintBtn = document.getElementById("hintButton");
+  const messageDiv = document.getElementById("message");
+  const letrasUsadasDiv = document.getElementById("letrasUsadas");
 
-  "azuis", "verde", "preto", "roxos", "cinza", "bronze", "branco",
+  // Cria as células do grid
+  for (let r = 0; r < 6; r++) {
+    for (let c = 0; c < 5; c++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.id = `cell-${r}-${c}`;
+      grid.appendChild(cell);
+    }
+  }
 
-  "pizza", "massa", "peixe", "porco", "leite", "bolos", "torta", "doces", "manga", 
-  "melao", "limao", "figos", "milho", "aveia", "trigo",
+  function atualizarLetrasUsadas() {
+    letrasUsadasDiv.textContent = Array.from(letrasUsadas).sort().join(", ").toUpperCase();
+  }
 
- "copos", "facas", "forno", "ferro", "pente", "sabao", "creme", "mouse", "radio", 
-  "pilha", "placa", "fonte",
+  function mostrarMensagem(msg) {
+    messageDiv.textContent = msg;
+  }
 
-  "andar", "pular", "nadar", "subir", "abrir", "ligar", "falar", "olhar", "sentir", "tocar", "pensar", 
-  "viver", "morrer", "nascer",
-     "raiva", "morte", "tempo", "forca", "poder", "calma", "chave", "chuva", "chama", "chega", "cheia",  "china", "choca", "chora", 
-  "malha", "velha", "folha", "molha", "bolha",  "falha",  "calha", 
-  "linha", "minha", "tinha",  "senha", "lenha", "venha", "tenha", "ninho",   "ombro", "braço", "pulso", "peito",  "bunda", "nariz",  "barba", "feliz",  "bravo", "calmo",  "livre", "preso"
+  function verificarPalpite() {
+    const tentativa = input.value.toLowerCase();
+    if (tentativa.length !== 5) {
+      mostrarMensagem("Digite 5 letras");
+      return;
+    }
 
+    input.value = "";
+    mostrarMensagem("");
 
-];
+    for (let i = 0; i < 5; i++) {
+      const cell = document.getElementById(`cell-${currentRow}-${i}`);
+      cell.textContent = tentativa[i].toUpperCase();
 
-    const gameDiv = document.getElementById("game");
-    const input = document.getElementById("guessInput");
-    const messageDiv = document.getElementById("message");
-    const usedLettersDiv = document.getElementById("used-letters");
-    let currentRow = 0;
-    let letrasUsadas = new Set();
-
-    let palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
-
-    function createRow(rowIndex) {
-      for (let i = 0; i < 5; i++) {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        cell.id = `cell-${rowIndex}-${i}`;
-        gameDiv.appendChild(cell);
+      if (tentativa[i] === palavraDoDia[i]) {
+        cell.classList.add("correct");
+      } else if (palavraDoDia.includes(tentativa[i])) {
+        cell.classList.add("present");
+      } else {
+        cell.classList.add("absent");
+        letrasUsadas.add(tentativa[i]);
       }
     }
 
-    function atualizarLetrasUsadas() {
-      usedLettersDiv.innerHTML = "";
-      Array.from(letrasUsadas).sort().forEach(letra => {
-        const span = document.createElement("span");
-        span.textContent = letra.toUpperCase();
-        span.className = "used-letter";
-        usedLettersDiv.appendChild(span);
-      });
+    atualizarLetrasUsadas();
+
+    if (tentativa === palavraDoDia) {
+      mostrarMensagem("🎉 Parabéns! Você acertou!");
+      input.disabled = true;
+      submitBtn.disabled = true;
+      hintBtn.disabled = true;
+      return;
     }
 
-    for (let i = 0; i < 6; i++) {
-      createRow(i);
+    currentRow++;
+    if (currentRow === 6) {
+      mostrarMensagem("💀 Fim de jogo! A palavra era: " + palavraDoDia.toUpperCase());
+      input.disabled = true;
+      submitBtn.disabled = true;
+      hintBtn.disabled = true;
+    }
+  }
+
+  function darDica() {
+    if (dicasUsadas >= maxDicas) {
+      mostrarMensagem("Você já usou todas as 3 dicas.");
+      return;
     }
 
-    input.addEventListener("keyup", function (event) {
-      if (event.key === "Enter") {
-        const guess = input.value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-        input.value = "";
-        if (guess.length !== 5 || !palavras.includes(guess)) {
-          messageDiv.textContent = "Ou eu esqueci essa palavra ou você escreveu errado.";
-          return;
-        }
-        messageDiv.textContent = "";
+    if (currentRow >= 6) return;
 
-        for (let i = 0; i < 5; i++) {
-          const cell = document.getElementById(`cell-${currentRow}-${i}`);
-          cell.textContent = guess[i];
-          if (guess[i] === palavraDoDia[i]) {
-            cell.classList.add("correct");
-          } else if (palavraDoDia.includes(guess[i])) {
-            cell.classList.add("present");
-          } else {
-            cell.classList.add("absent");
-            letrasUsadas.add(guess[i]);
-          }
-        }
-
-        atualizarLetrasUsadas();
-
-        if (guess === palavraDoDia) {
-          messageDiv.textContent = "Você acertou! Nova palavra sorteada!";
-          palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
-          gameDiv.innerHTML = "";
-          letrasUsadas.clear();
-          atualizarLetrasUsadas();
-          currentRow = 0;
-          for (let i = 0; i < 6; i++) createRow(i);
-          return;
-        }
-
-        currentRow++;
-        if (currentRow >= 6) {
-          messageDiv.textContent = `Errou tudo! A palavra era "${palavraDoDia.toUpperCase()}". Nova palavra sorteada!`;
-          palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
-          gameDiv.innerHTML = "";
-          letrasUsadas.clear();
-          atualizarLetrasUsadas();
-          currentRow = 0;
-          for (let i = 0; i < 6; i++) createRow(i);
+    let letrasReveladas = [];
+    for (let r = 0; r <= currentRow; r++) {
+      for (let c = 0; c < 5; c++) {
+        const cell = document.getElementById(`cell-${r}-${c}`);
+        if (cell.classList.contains("correct")) {
+          letrasReveladas.push({ letra: cell.textContent.toLowerCase(), pos: c });
         }
       }
-    });
-  </script>
+    }
+
+    const possiveisDicas = [];
+    for (let i = 0; i < 5; i++) {
+      const letra = palavraDoDia[i];
+      const jaRevelada = letrasReveladas.some(rev => rev.pos === i);
+      const jaUsada = letrasUsadas.has(letra);
+      const cellAtual = document.getElementById(`cell-${currentRow}-${i}`);
+      const jaPreenchida = cellAtual.textContent.trim() !== "";
+
+      if (!jaRevelada && !jaUsada && !jaPreenchida) {
+        possiveisDicas.push({ letra, pos: i });
+      }
+    }
+
+    if (possiveisDicas.length === 0) {
+      mostrarMensagem("Todas as letras já foram usadas ou reveladas.");
+      return;
+    }
+
+    const dica = possiveisDicas[Math.floor(Math.random() * possiveisDicas.length)];
+    const cell = document.getElementById(`cell-${currentRow}-${dica.pos}`);
+    cell.textContent = dica.letra.toUpperCase();
+    cell.classList.add("correct");
+    letrasUsadas.add(dica.letra);
+    dicasUsadas++;
+    atualizarLetrasUsadas();
+
+    hintBtn.textContent = `🔍 Dica (${maxDicas - dicasUsadas} restantes)`;
+  }
+
+  submitBtn.addEventListener("click", verificarPalpite);
+  input.addEventListener("keyup", e => {
+    if (e.key === "Enter") verificarPalpite();
+  });
+  hintBtn.addEventListener("click", darDica);
+</script>
 </body>
-
 </html>
