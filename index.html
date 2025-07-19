@@ -1,29 +1,106 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Penius</title>
   <style>
-    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-    #game { display: grid; grid-template-columns: repeat(5, 60px); grid-gap: 10px; margin-top: 20px; }
-    .cell { width: 60px; height: 60px; border: 2px solid #ccc; text-align: center; line-height: 60px; font-size: 24px; text-transform: uppercase; }
-    .correct { background-color: green; color: white; }
-    .present { background-color: goldenrod; color: white; }
-    .absent { background-color: #ccc; color: white; }
-    input[type="text"] { margin-top: 20px; padding: 10px; font-size: 18px; width: 320px; text-align: center; text-transform: uppercase; }
-    #message { margin-top: 20px; font-weight: bold; }
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #container {
+      display: flex;
+      gap: 40px;
+    }
+
+    #game {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      grid-gap: 10px;
+      margin-top: 20px;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #ccc;
+      text-align: center;
+      line-height: 60px;
+      font-size: 24px;
+      text-transform: uppercase;
+    }
+
+    .correct {
+      background-color: green;
+      color: white;
+    }
+
+    .present {
+      background-color: goldenrod;
+      color: white;
+    }
+
+    .absent {
+      background-color: #ccc;
+      color: white;
+    }
+
+    #used-letters-container {
+      margin-top: 20px;
+    }
+
+    #used-letters {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 120px;
+      gap: 5px;
+      font-weight: bold;
+    }
+
+    .used-letter {
+      padding: 5px;
+      background-color: #ccc;
+      border-radius: 4px;
+    }
+
+    input[type="text"] {
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 18px;
+      width: 320px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
   </style>
 </head>
+
 <body>
   <h1>Penius</h1>
-  <div id="game"></div>
-  <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Digite sua palavra">
-  <div id="message"></div>
+  <div id="container">
+    <div>
+      <div id="game"></div>
+      <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Digite sua palavra">
+      <div id="message"></div>
+    </div>
+    <div id="used-letters-container">
+      <h2>Letras Usadas</h2>
+      <div id="used-letters"></div>
+    </div>
+  </div>
 
   <script>
-     const palavras = [
-  "cuzao", "penis", "bolas", "vadio", "pinto", "gosto", "surra", "tanga", "cuspe", "dildo", "porno", "malha", 
+    const palavras = [  "cuzao", "penis", "bolas", "vadio", "pinto", "gosto", "surra", "tanga", "cuspe", "dildo", "porno", "malha", 
   "nudes", "bosta", "merda", "chupe", "samba", "roubo", "vulva", "gozar", "guria", "corno", "treta", "doido", 
   "viado", "putas", "babao", "bunda", "leite", "mamas", "perna", "tetas", "putao", "papos", "mansa", "dedao", 
   "rosca", "mamou", "mamam", "leito", "orgia", "rolao", "socar", "lambe", "tesao", "molha", "cevas", "chuca", 
@@ -61,13 +138,15 @@
   "malha", "velha", "folha", "molha", "bolha",  "falha",  "calha", 
   "linha", "minha", "tinha",  "senha", "lenha", "venha", "tenha", "ninho",   "ombro", "braço", "pulso", "peito",  "bunda", "nariz",  "barba", "feliz",  "bravo", "calmo",  "livre", "preso"
 
-];
 
+];
 
     const gameDiv = document.getElementById("game");
     const input = document.getElementById("guessInput");
     const messageDiv = document.getElementById("message");
+    const usedLettersDiv = document.getElementById("used-letters");
     let currentRow = 0;
+    let letrasUsadas = new Set();
 
     let palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
 
@@ -80,12 +159,21 @@
       }
     }
 
-    // Cria 6 linhas logo no início
+    function atualizarLetrasUsadas() {
+      usedLettersDiv.innerHTML = "";
+      Array.from(letrasUsadas).sort().forEach(letra => {
+        const span = document.createElement("span");
+        span.textContent = letra.toUpperCase();
+        span.className = "used-letter";
+        usedLettersDiv.appendChild(span);
+      });
+    }
+
     for (let i = 0; i < 6; i++) {
       createRow(i);
     }
 
-    input.addEventListener("keyup", function(event) {
+    input.addEventListener("keyup", function (event) {
       if (event.key === "Enter") {
         const guess = input.value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
         input.value = "";
@@ -104,13 +192,18 @@
             cell.classList.add("present");
           } else {
             cell.classList.add("absent");
+            letrasUsadas.add(guess[i]);
           }
         }
+
+        atualizarLetrasUsadas();
 
         if (guess === palavraDoDia) {
           messageDiv.textContent = "Você acertou! Nova palavra sorteada!";
           palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
           gameDiv.innerHTML = "";
+          letrasUsadas.clear();
+          atualizarLetrasUsadas();
           currentRow = 0;
           for (let i = 0; i < 6; i++) createRow(i);
           return;
@@ -121,6 +214,8 @@
           messageDiv.textContent = Errou tudo! A palavra era "${palavraDoDia.toUpperCase()}". Nova palavra sorteada!;
           palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
           gameDiv.innerHTML = "";
+          letrasUsadas.clear();
+          atualizarLetrasUsadas();
           currentRow = 0;
           for (let i = 0; i < 6; i++) createRow(i);
         }
@@ -128,4 +223,5 @@
     });
   </script>
 </body>
+
 </html>
