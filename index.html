@@ -1,186 +1,102 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordle BR</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            min-height: 100vh;
-        }
-        .cell {
-            width: 3.5rem; height: 3.5rem;
-            border: 2px solid #d1d5db;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 2rem; font-weight: bold; text-transform: uppercase;
-            transition: all 0.3s;
-        }
-        @media (max-width: 640px) {
-            .cell { width: 2.8rem; height: 2.8rem; font-size: 1.5rem; }
-        }
-        .key {
-            width: 2rem; height: 3rem; margin: 0.2rem;
-            border-radius: 0.25rem; font-weight: bold;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; user-select: none;
-        }
-        @media (max-width: 640px) {
-            .key { width: 1.8rem; height: 2.5rem; margin: 0.1rem; font-size: 0.9rem; }
-            .special-key { width: 3rem; font-size: 0.8rem; }
-        }
-        .correct { background-color: #16a34a; color: white; border-color: #16a34a; }
-        .present { background-color: #eab308; color: white; border-color: #eab308; }
-        .absent { background-color: #6b7280; color: white; border-color: #6b7280; }
-        .animate-shake {
-            animation: shake 0.5s ease-in-out;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Penius</title>
+  <style>
+    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    #game { display: grid; grid-template-columns: repeat(5, 60px); grid-gap: 10px; margin-top: 20px; }
+    .cell { width: 60px; height: 60px; border: 2px solid #ccc; text-align: center; line-height: 60px; font-size: 24px; text-transform: uppercase; }
+    .correct { background-color: green; color: white; }
+    .present { background-color: goldenrod; color: white; }
+    .absent { background-color: #ccc; color: white; }
+    input[type="text"] { margin-top: 20px; padding: 10px; font-size: 18px; width: 320px; text-align: center; text-transform: uppercase; }
+    #message { margin-top: 20px; font-weight: bold; }
+  </style>
 </head>
-<body class="flex flex-col items-center py-8 px-4">
-    <div class="w-full max-w-md mx-auto">
-        <h1 class="text-2xl font-bold mb-4">WORDLE BR</h1>
-        <div id="gameBoard" class="grid grid-rows-6 gap-1 mb-8 mx-auto"></div>
-        <div id="keyboard" class="mt-4"></div>
-    </div>
+<body>
+  <h1>Penius</h1>
+  <div id="game"></div>
+  <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Digite sua palavra">
+  <div id="message"></div>
 
-    <script>
-        const WORD_LENGTH = 5;
-        const MAX_ATTEMPTS = 6;
+  <script>
+    const palavras = [
+  "arroz", "carro", "pedra", "luzia", "lapis", "cobra", "zebra", "bicho", "livro", "nuvem",
+  "cuzão", "penis", "bolas", "vadio", "pinto", "xavas", "gosto", "surra", "cacet", "tanga",
+  "xerec", "cuspe", "bucet", "dildo", "lenta", "trava", "nudes", "porno", "malha", "chuva",
+  "parda", "ruiva", "amora", "selva", "turbo", "cacto", "lindo", "feios", "burro", "massa",
+  "tocha", "vinil", "meias", "sushi", "kombi", "trote", "cofre", "vinho", "pirar", "manja",
+  "vazar", "ranho", "larva", "sagaz", "duros", "densa", "mofar", "troco", "velha", "berro",
+  "urubu", "muros", "vetor", "moeda", "raiva", "bosta", "merda", "zumbi", "chupe", "xingo",
+  "samba", "roubo", "vulva", "mijoa", "gozar", "gosta", "guria", "piran", "corno", "nobre",
+  "treta", "doido", "maluco", "viado", "rolou", "putas",
+  // Palavras adicionais (algumas comuns, outras ofensivas/gírias)
+  "babao", "bunda", "leite", "mamas", "perna", "tetas", "sadia", "putao", "papos", "mansa",
+  "dedao", "rosca", "mamou", "mamam", "leito", "orgia", "gozoa", "gulos", "mamam", "rolaõ",
+  "socar", "lambe", "tesao", "xerex", "sadia", "molha", "cevas", "chuca", "nossa", "lenta",
+  "pariu", "noite", "vazio", "tesao", "comer", "comia", "dores", "cinto", "cuzin", "manco",
+  "nudes", "beijo", "velho", "sogra", "noiva", "hiena", "carne", "porra", "pauza", "melao",
+  "cagar", "muito", "verbo", "nariz", "morro", "pavio", "tetas", "mamou", "gorda", "chuca",
+  "surra", "rouba", "farto", "manco", "gemer", "pinto", "xanao", "nojoo", "penso", "dessa",
+  "banho", "feira", "bocas", "coito", "risos", "luzia", "macho", "tonta", "comer", "bocas",
+  "preto", "louro", "louco", "matar", "morre", "ferir", "braba", "lindo", "burra", "laran",
+  "sarro", "putin", "salve", "forno", "festa", "reuni", "notar", "comem", "quero", "feios",
+  "prato", "roupa", "grade", "vadio", "viado", "canal", "puxao", "puxam", "troca", "ganha"
+];
 
-        function removerAcentos(str) {
-            return str.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
+    const gameDiv = document.getElementById("game");
+    const input = document.getElementById("guessInput");
+    const messageDiv = document.getElementById("message");
+    let currentRow = 0;
+
+    let palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
+
+    function createRow() {
+      for (let i = 0; i < 5; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.id = `cell-${currentRow}-${i}`;
+        gameDiv.appendChild(cell);
+      }
+    }
+
+    createRow();
+
+    input.addEventListener("keyup", function(event) {
+      if (event.key === "Enter") {
+        const guess = input.value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+        input.value = "";
+        if (guess.length !== 5 || !palavras.includes(guess)) {
+          messageDiv.textContent = "Palavra inválida!";
+          return;
         }
-
-        const VALID_WORDS = [
-            'aviao', 'cafe', 'peito', 'bunda', 'carro', 'livro', 'amora', 'fezes', 'abacate',
-            'banho', 'acido', 'gente', 'chuva', 'coisa', 'verde', 'amigo', 'corpo', 'linha',
-            'brisa', 'limpo', 'suave', 'balas', 'tarde', 'claro', 'massa', 'vapor', 'noite'
-        ];
-
-        let secretWord = '';
-        let secretWordSemAcento = '';
-        let currentAttempt = 0;
-        let currentRow = [];
-        let gameOver = false;
-
-        const board = document.getElementById('gameBoard');
-        const keyboard = document.getElementById('keyboard');
-
-        function initGame() {
-            secretWord = VALID_WORDS[Math.floor(Math.random() * VALID_WORDS.length)].toUpperCase();
-            secretWordSemAcento = removerAcentos(secretWord);
-            currentAttempt = 0;
-            currentRow = [];
-            gameOver = false;
-
-            board.innerHTML = '';
-            for (let i = 0; i < MAX_ATTEMPTS; i++) {
-                const row = document.createElement('div');
-                row.className = 'grid grid-cols-5 gap-1';
-                for (let j = 0; j < WORD_LENGTH; j++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    row.appendChild(cell);
-                }
-                board.appendChild(row);
-            }
+        messageDiv.textContent = "";
+        for (let i = 0; i < 5; i++) {
+          const cell = document.getElementById(`cell-${currentRow}-${i}`);
+          cell.textContent = guess[i];
+          if (guess[i] === palavraDoDia[i]) {
+            cell.classList.add("correct");
+          } else if (palavraDoDia.includes(guess[i])) {
+            cell.classList.add("present");
+          } else {
+            cell.classList.add("absent");
+          }
         }
-
-        function createKeyboard() {
-            const layout = [
-                'QWERTYUIOP',
-                'ASDFGHJKL',
-                'ENTERZXCVBNMÇ⌫'
-            ];
-            keyboard.innerHTML = '';
-            layout.forEach(row => {
-                const div = document.createElement('div');
-                div.className = 'flex justify-center mb-1';
-                row.split('').forEach(k => {
-                    const key = document.createElement('div');
-                    key.className = 'key';
-                    key.dataset.key = k;
-                    key.textContent = k === '⌫' ? '⌫' : k;
-                    if (k === 'ENTER' || k === '⌫') key.classList.add('special-key');
-                    key.addEventListener('click', () => handleKeyPress(k));
-                    div.appendChild(key);
-                });
-                keyboard.appendChild(div);
-            });
+        if (guess === palavraDoDia) {
+          messageDiv.textContent = "Você acertou! Jogue novamente!";
+          palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
+          currentRow = 0;
+          gameDiv.innerHTML = "";
+          createRow();
+          return;
         }
-
-        function handleKeyPress(key) {
-            if (gameOver) return;
-            const row = board.children[currentAttempt].children;
-            if (key === 'ENTER') {
-                if (currentRow.length < WORD_LENGTH) return;
-                const word = currentRow.join('');
-                const wordSemAcento = removerAcentos(word);
-                const match = VALID_WORDS.some(w => removerAcentos(w.toUpperCase()) === wordSemAcento);
-                if (!match) return shakeRow(currentAttempt);
-
-                const secret = secretWordSemAcento.split('');
-                const evals = Array(WORD_LENGTH).fill('absent');
-
-                for (let i = 0; i < WORD_LENGTH; i++) {
-                    if (wordSemAcento[i] === secret[i]) {
-                        evals[i] = 'correct';
-                        secret[i] = null;
-                    }
-                }
-                for (let i = 0; i < WORD_LENGTH; i++) {
-                    if (evals[i] === 'absent' && secret.includes(wordSemAcento[i])) {
-                        evals[i] = 'present';
-                        secret[secret.indexOf(wordSemAcento[i])] = null;
-                    }
-                }
-
-                for (let i = 0; i < WORD_LENGTH; i++) {
-                    const cell = row[i];
-                    cell.textContent = currentRow[i];
-                    cell.classList.add(evals[i]);
-                }
-
-                if (wordSemAcento === secretWordSemAcento) return gameOver = true;
-                currentAttempt++;
-                currentRow = [];
-                if (currentAttempt >= MAX_ATTEMPTS) gameOver = true;
-
-            } else if (key === '⌫') {
-                if (currentRow.length > 0) {
-                    currentRow.pop();
-                    row[currentRow.length].textContent = '';
-                }
-            } else if (/^[A-ZÇ]$/.test(key) && currentRow.length < WORD_LENGTH) {
-                currentRow.push(key);
-                row[currentRow.length - 1].textContent = key;
-            }
-        }
-
-        function shakeRow(rowIdx) {
-            const row = board.children[rowIdx];
-            row.classList.add('animate-shake');
-            setTimeout(() => row.classList.remove('animate-shake'), 500);
-        }
-
-        document.addEventListener('keydown', e => {
-            const k = e.key.toUpperCase();
-            if (k === 'BACKSPACE') handleKeyPress('⌫');
-            else if (k === 'ENTER') handleKeyPress('ENTER');
-            else if (/^[A-ZÇ]$/.test(k)) handleKeyPress(removerAcentos(k));
-        });
-
-        initGame();
-        createKeyboard();
-    </script>
+        currentRow++;
+        createRow();
+      }
+    });
+  </script>
 </body>
 </html>
