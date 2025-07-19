@@ -1,237 +1,133 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Penius</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Penius<title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="palavras.js"></script>
+  <script defer src="script.js"></script>
   <style>
     body {
-      font-family: sans-serif;
+      background-color: #121212;
+      color: #f1f1f1;
+      font-family: Arial, sans-serif;
       display: flex;
-      flex-direction: row;
       justify-content: center;
       align-items: flex-start;
-      gap: 40px;
-      margin-top: 50px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
     }
 
-    .game-container {
+    #container {
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      gap: 40px;
     }
 
-    .grid {
+    #game {
       display: grid;
-      grid-template-columns: repeat(5, 50px);
-      grid-gap: 5px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(5, 60px);
+      grid-gap: 10px;
     }
 
-    .cell {
-      width: 50px;
-      height: 50px;
-      border: 2px solid #ccc;
+    .tile {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 24px;
-      font-weight: bold;
-      text-transform: uppercase;
-      text-align: center;
-      line-height: 50px;
-      background-color: #fff;
+      background-color: #1e1e1e;
+      color: #fff;
     }
 
-    .correct {
-      background-color: #6aaa64;
-      color: white;
+    #used-letters-container {
+      min-width: 150px;
+      background-color: #1e1e1e;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     }
 
-    .present {
-      background-color: #c9b458;
-      color: white;
+    #used-letters-container h2 {
+      margin-top: 0;
+      font-size: 18px;
     }
 
-    .absent {
-      background-color: #787c7e;
-      color: white;
-    }
-
-    input[type="text"] {
-      font-size: 20px;
-      text-transform: uppercase;
-      padding: 5px;
-      width: 150px;
-      text-align: center;
-    }
-
-    button {
+    #used-letters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
       margin-top: 10px;
-      padding: 6px 12px;
+    }
+
+    .used-letter {
+      background-color: #444;
+      color: #aaa;
+      border-radius: 4px;
+      padding: 5px 8px;
       font-size: 16px;
-      cursor: pointer;
-    }
-
-    .used-letters {
-      border: 1px solid #ccc;
-      padding: 10px;
-      width: 150px;
-      min-height: 100px;
-      background-color: #f7f7f7;
-    }
-
-    .used-letters h3 {
-      margin: 0 0 10px 0;
-      font-size: 16px;
-    }
-
-    .message {
-      margin-top: 10px;
-      height: 20px;
-      color: #333;
     }
   </style>
 </head>
+
 <body>
+  <div id="container">
+    <div id="game"></div>
+    <div id="used-letters-container">
+      <h2>Letras Usadas</h2>
+      <div id="used-letters"></div>
+    </div>
+  </div>
+  <script>
+    const gameElement = document.getElementById('game');
+    const usedLettersContainer = document.getElementById('used-letters');
+    const palavraSecreta = "canto";
+    let letrasUsadas = new Set();
+    let dicasUsadas = 0;
+    const limiteDicas = 3;
 
-<div class="game-container">
-  <div class="grid" id="grid"></div>
-  <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Digite uma palavra">
-  <button id="submitGuess">Enviar</button>
-  <button id="hintButton">🔍 Dica (3 restantes)</button>
-  <div class="message" id="message"></div>
-</div>
-
-<div class="used-letters">
-  <h3>Letras Usadas</h3>
-  <div id="letrasUsadas"></div>
-</div>
-
-<script>
-  const palavras = ["manga", "pedra", "livro", "canto", "dente", "festa", "cabra", "pular", "grito", "velho"];
-  const palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)];
-  let currentRow = 0;
-  const maxDicas = 3;
-  let dicasUsadas = 0;
-  const letrasUsadas = new Set();
-
-  const grid = document.getElementById("grid");
-  const input = document.getElementById("guessInput");
-  const submitBtn = document.getElementById("submitGuess");
-  const hintBtn = document.getElementById("hintButton");
-  const messageDiv = document.getElementById("message");
-  const letrasUsadasDiv = document.getElementById("letrasUsadas");
-
-  // Cria as células do grid
-  for (let r = 0; r < 6; r++) {
-    for (let c = 0; c < 5; c++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.id = `cell-${r}-${c}`;
-      grid.appendChild(cell);
-    }
-  }
-
-  function atualizarLetrasUsadas() {
-    letrasUsadasDiv.textContent = Array.from(letrasUsadas).sort().join(", ").toUpperCase();
-  }
-
-  function mostrarMensagem(msg) {
-    messageDiv.textContent = msg;
-  }
-
-  function verificarPalpite() {
-    const tentativa = input.value.toLowerCase();
-    if (tentativa.length !== 5) {
-      mostrarMensagem("Digite 5 letras");
-      return;
-    }
-
-    input.value = "";
-    mostrarMensagem("");
-
-    for (let i = 0; i < 5; i++) {
-      const cell = document.getElementById(`cell-${currentRow}-${i}`);
-      cell.textContent = tentativa[i].toUpperCase();
-
-      if (tentativa[i] === palavraDoDia[i]) {
-        cell.classList.add("correct");
-      } else if (palavraDoDia.includes(tentativa[i])) {
-        cell.classList.add("present");
-      } else {
-        cell.classList.add("absent");
-        letrasUsadas.add(tentativa[i]);
+    function criarGrade() {
+      for (let i = 0; i < 30; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        gameElement.appendChild(tile);
       }
     }
 
-    atualizarLetrasUsadas();
-
-    if (tentativa === palavraDoDia) {
-      mostrarMensagem("🎉 Parabéns! Você acertou!");
-      input.disabled = true;
-      submitBtn.disabled = true;
-      hintBtn.disabled = true;
-      return;
-    }
-
-    currentRow++;
-    if (currentRow === 6) {
-      mostrarMensagem("💀 Fim de jogo! A palavra era: " + palavraDoDia.toUpperCase());
-      input.disabled = true;
-      submitBtn.disabled = true;
-      hintBtn.disabled = true;
-    }
-  }
-
-  function darDica() {
-    if (dicasUsadas >= maxDicas) {
-      mostrarMensagem("Você já usou todas as 3 dicas.");
-      return;
-    }
-
-    if (currentRow >= 6) return;
-
-    let letrasReveladas = [];
-    for (let r = 0; r <= currentRow; r++) {
-      for (let c = 0; c < 5; c++) {
-        const cell = document.getElementById(`cell-${r}-${c}`);
-        if (cell.classList.contains("correct")) {
-          letrasReveladas.push({ letra: cell.textContent.toLowerCase(), pos: c });
-        }
+    function atualizarLetrasUsadas(letra, contemNaPalavra) {
+      if (!contemNaPalavra && !letrasUsadas.has(letra)) {
+        letrasUsadas.add(letra);
+        const span = document.createElement('span');
+        span.className = 'used-letter';
+        span.textContent = letra;
+        usedLettersContainer.appendChild(span);
       }
     }
 
-    const possiveisDicas = [];
-    for (let i = 0; i < 5; i++) {
-      const letra = palavraDoDia[i];
-      const jaRevelada = letrasReveladas.some(rev => rev.pos === i);
-      const jaUsada = letrasUsadas.has(letra);
-      const cellAtual = document.getElementById(`cell-${currentRow}-${i}`);
-      const jaPreenchida = cellAtual.textContent.trim() !== "";
-
-      if (!jaRevelada && !jaUsada && !jaPreenchida) {
-        possiveisDicas.push({ letra, pos: i });
+    function mostrarDica() {
+      if (dicasUsadas >= limiteDicas) {
+        alert("Você já usou todas as 3 dicas desta rodada!");
+        return;
       }
+      // Exemplo de dica: revelar uma letra certa na posição
+      let letraCerta = palavraSecreta[dicasUsadas];
+      alert(`Dica ${dicasUsadas + 1}: A letra ${letraCerta.toUpperCase()} está na posição ${dicasUsadas + 1}`);
+      dicasUsadas++;
     }
 
-    if (possiveisDicas.length === 0) {
-      mostrarMensagem("Todas as letras já foram usadas ou reveladas.");
-      return;
+    criarGrade();
+
+    // Exemplo de uso (simula digitação do jogador)
+    const exemploTentativa = "pleno";
+    for (let i = 0; i < exemploTentativa.length; i++) {
+      const letra = exemploTentativa[i];
+      atualizarLetrasUsadas(letra, palavraSecreta.includes(letra));
     }
-
-    const dica = possiveisDicas[Math.floor(Math.random() * possiveisDicas.length)];
-    const cell = document.getElementById(`cell-${currentRow}-${dica.pos}`);
-    cell.textContent = dica.letra.toUpperCase();
-    cell.classList.add("correct");
-    letrasUsadas.add(dica.letra);
-    dicasUsadas++;
-    atualizarLetrasUsadas();
-
-    hintBtn.textContent = `🔍 Dica (${maxDicas - dicasUsadas} restantes)`;
-  }
-
-  submitBtn.addEventListener("click", verificarPalpite);
-  input.addEventListener("keyup", e => {
-    if (e.key === "Enter") verificarPalpite();
-  });
-  hintBtn.addEventListener("click", darDica);
-</script>
+  </script>
 </body>
+
 </html>
