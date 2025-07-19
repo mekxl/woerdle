@@ -85,7 +85,7 @@
   <script>
     const gameElement = document.getElementById('game');
     const usedLettersContainer = document.getElementById('used-letters');
-    const palavraSecreta = "canto";
+    const palavraSecreta = listaPalavras[Math.floor(Math.random() * listaPalavras.length)];
     let letrasUsadas = new Set();
     let dicasUsadas = 0;
     const limiteDicas = 3;
