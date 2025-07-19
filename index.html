@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Penius</title>
   <style>
     body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
@@ -22,7 +22,7 @@
   <div id="message"></div>
 
   <script>
-   const palavras = [
+     const palavras = [
   "cuzao", "penis", "bolas", "vadio", "pinto", "gosto", "surra", "tanga", "cuspe", "dildo", "porno", "malha", 
   "nudes", "bosta", "merda", "chupe", "samba", "roubo", "vulva", "gozar", "guria", "corno", "treta", "doido", 
   "viado", "putas", "babao", "bunda", "leite", "mamas", "perna", "tetas", "putao", "papos", "mansa", "dedao", 
@@ -59,7 +59,10 @@
   "viver", "morrer", "nascer",
      "raiva", "morte", "tempo", "forca", "poder", "calma", "chave", "chuva", "chama", "chega", "cheia",  "china", "choca", "chora", 
   "malha", "velha", "folha", "molha", "bolha",  "falha",  "calha", 
-  "linha", "minha", "tinha",  "senha", "lenha", "venha", "tenha", "ninho",   "ombro", "braço", "pulso", "peito",  "bunda", "nariz",  "barba", "feliz",  "bravo", "calmo",  "livre", "preso",
+  "linha", "minha", "tinha",  "senha", "lenha", "venha", "tenha", "ninho",   "ombro", "braço", "pulso", "peito",  "bunda", "nariz",  "barba", "feliz",  "bravo", "calmo",  "livre", "preso"
+
+];
+
 
     const gameDiv = document.getElementById("game");
     const input = document.getElementById("guessInput");
@@ -68,26 +71,30 @@
 
     let palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
 
-    function createRow() {
+    function createRow(rowIndex) {
       for (let i = 0; i < 5; i++) {
         const cell = document.createElement("div");
         cell.className = "cell";
-        cell.id = `cell-${currentRow}-${i}`;
+        cell.id = `cell-${rowIndex}-${i}`;
         gameDiv.appendChild(cell);
       }
     }
 
-    createRow();
+    // Cria 6 linhas logo no início
+    for (let i = 0; i < 6; i++) {
+      createRow(i);
+    }
 
     input.addEventListener("keyup", function(event) {
       if (event.key === "Enter") {
         const guess = input.value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
         input.value = "";
         if (guess.length !== 5 || !palavras.includes(guess)) {
-          messageDiv.textContent = "Ou eu esqueci essa palavra ou você escreveu errado";
+          messageDiv.textContent = "Ou eu esqueci essa palavra ou você escreveu errado.";
           return;
         }
         messageDiv.textContent = "";
+
         for (let i = 0; i < 5; i++) {
           const cell = document.getElementById(`cell-${currentRow}-${i}`);
           cell.textContent = guess[i];
@@ -99,16 +106,24 @@
             cell.classList.add("absent");
           }
         }
+
         if (guess === palavraDoDia) {
-          messageDiv.textContent = "Você acertou! Jogue novamente!";
+          messageDiv.textContent = "Você acertou! Nova palavra sorteada!";
           palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
-          currentRow = 0;
           gameDiv.innerHTML = "";
-          createRow();
+          currentRow = 0;
+          for (let i = 0; i < 6; i++) createRow(i);
           return;
         }
+
         currentRow++;
-        createRow();
+        if (currentRow >= 6) {
+          messageDiv.textContent = `Errou tudo! A palavra era "${palavraDoDia.toUpperCase()}". Nova palavra sorteada!`;
+          palavraDoDia = palavras[Math.floor(Math.random() * palavras.length)].toLowerCase();
+          gameDiv.innerHTML = "";
+          currentRow = 0;
+          for (let i = 0; i < 6; i++) createRow(i);
+        }
       }
     });
   </script>
